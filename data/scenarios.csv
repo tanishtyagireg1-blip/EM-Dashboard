@@ -1,0 +1,4 @@
+scenario,ltv_cac,payback_months,gross_margin,customers_m36,arr_m36_inr,cash_needed_inr,first_cash_positive_month
+Pessimistic,1.228,24.42,0.6005,60.3,12818977,38100441,
+Base,3.059,12.26,0.6973,92.0,25843500,20543344,41
+Optimistic,7.377,6.78,0.7692,118.4,43597703,7931524,30

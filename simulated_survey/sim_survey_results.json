@@ -1,0 +1,62 @@
+{
+ "n": 60,
+ "seed": 20261102,
+ "SIMULATED": true,
+ "waste_seen": {
+  "Never": 2,
+  "Rarely": 12,
+  "Sometimes": 8,
+  "Often": 27,
+  "Always": 11
+ },
+ "waste_share": {
+  "Less than 5%": 4,
+  "5-10%": 18,
+  "10-20%": 22,
+  "20-30%": 10,
+  "More than 30%": 6
+ },
+ "runout": {
+  "Never": 15,
+  "Rarely": 21,
+  "Sometimes": 16,
+  "Often": 8
+ },
+ "skip": {
+  "Never": 9,
+  "Rarely": 7,
+  "Sometimes": 29,
+  "Often": 13,
+  "Always": 2
+ },
+ "signup": {
+  "Yes": 27,
+  "Maybe": 20,
+  "No": 13
+ },
+ "pct_waste_often_always": 63.3,
+ "ci_waste": [
+  50.7,
+  74.4
+ ],
+ "mean_perceived_waste_share": 15.6,
+ "pct_runout_sometimes_plus": 40.0,
+ "ci_runout": [
+  28.6,
+  52.6
+ ],
+ "pct_skip_sometimes_plus": 73.3,
+ "ci_skip": [
+  61.0,
+  82.9
+ ],
+ "pct_signup_yes_or_maybe": 78.3,
+ "ci_signup": [
+  66.4,
+  86.9
+ ],
+ "pct_signup_yes": 45.0,
+ "mean_attendance_pct": 77.7,
+ "half_width_n30": 17.9,
+ "half_width_n60": 12.7
+}

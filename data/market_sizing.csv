@@ -1,0 +1,11 @@
+item,value,unit
+contract_catering_market,34188,INR crore
+food_purchases,11966,INR crore
+wasted_food,1197,INR crore
+reducible_waste,359,INR crore
+TAM_top_down,138.3,INR crore
+TAM_bottom_up,121.6,INR crore
+SAM,36.5,INR crore
+SOM_ARR_month36,2.58,INR crore
+hostel_diners,4330000,diners
+SAM_diners,1299000,diners

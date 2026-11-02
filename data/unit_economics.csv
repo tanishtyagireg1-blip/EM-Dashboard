@@ -1,0 +1,11 @@
+metric,value,unit
+gross_food_saved,729000,INR/site/year
+revenue,280800,INR/site/year
+cost_of_service,85000,INR/site/year
+gross_profit,195800,INR/site/year
+gross_margin,0.6973,ratio
+payback,12.26,months
+ltv,611875,INR
+ltv_cac,3.059,x
+client_net_saving,448200,INR/site/year
+portions_saved,24300,portions/site/year

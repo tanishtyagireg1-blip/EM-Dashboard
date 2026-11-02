@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlateWise Dashboard</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f4f1; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --blue: #2a78d6; --orange: #eb6834; --aqua: #1baf7a; --violet: #6250d6; --yellow: #eda100; --red: #e34948;
+  --blue-l: #e8f1fc; --orange-l: #fdede4; --teal-l: #e3f5ec; --violet-l: #eeecfb; --amber-l: #fff4d6;
+  --teal: #118a60; --good: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --blue: #3987e5; --orange: #d95926; --aqua: #199e70; --violet: #9085e9; --yellow: #c98500; --red: #e66767;
+    --blue-l: #17283f; --orange-l: #3a2218; --teal-l: #14302a; --violet-l: #231f3f; --amber-l: #3a2f12;
+    --teal: #199e70; --good: #0ca30c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --blue: #3987e5; --orange: #d95926; --aqua: #199e70; --violet: #9085e9; --yellow: #c98500; --red: #e66767;
+  --blue-l: #17283f; --orange-l: #3a2218; --teal-l: #14302a; --violet-l: #231f3f; --amber-l: #3a2f12;
+  --teal: #199e70; --good: #0ca30c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+h1 { font-size: 26px; margin: 0; letter-spacing: -.01em; }
+h1 span { color: var(--orange); }
+.sub { color: var(--ink2); margin: 2px 0 0; font-size: 14px; }
+button, select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--axis); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+button:hover { border-color: var(--blue); }
+button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.stripe { height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--blue) 0 25%, var(--aqua) 25% 50%, var(--violet) 50% 75%, var(--orange) 75%); margin-bottom: 14px; }
+.banner { background: var(--amber-l); border-left: 5px solid var(--yellow); padding: 10px 14px; border-radius: 6px; font-size: 13.5px; margin-bottom: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.card h2 { font-size: 16px; margin: 0 0 2px; }
+.card .note { color: var(--ink2); font-size: 13px; margin: 0 0 10px; }
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.tiles { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); margin-bottom: 16px; }
+.tile { border-radius: 10px; padding: 10px 12px; border-top: 4px solid var(--blue); background: var(--blue-l); }
+.tile .v { font-size: 24px; font-weight: 700; line-height: 1.15; }
+.tile .k { font-size: 12px; color: var(--ink2); }
+.tile.teal { border-color: var(--aqua); background: var(--teal-l); } .tile.teal .v { color: var(--teal); }
+.tile.violet { border-color: var(--violet); background: var(--violet-l); } .tile.violet .v { color: var(--violet); }
+.tile.orange { border-color: var(--orange); background: var(--orange-l); } .tile.orange .v { color: var(--orange); }
+.tile.blue .v { color: var(--blue); }
+.controls { display: grid; gap: 10px 22px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-top: 10px; }
+.ctl label { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink2); }
+.ctl b { color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--blue); }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink2); margin: 0 0 6px; }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.legend i.sq { height: 10px; width: 10px; border-radius: 2px; }
+.chart { position: relative; }
+svg { width: 100%; height: auto; display: block; }
+svg text { font: 11px system-ui, sans-serif; fill: var(--ink2); }
+svg .tick { fill: var(--muted); }
+svg .lab { fill: var(--ink); font-weight: 600; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--axis); border-radius: 8px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.18); display: none; z-index: 5; white-space: nowrap; }
+.tip b { display: block; margin-bottom: 2px; }
+details { margin-top: 8px; font-size: 12.5px; }
+summary { cursor: pointer; color: var(--ink2); }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 6px; }
+th, td { border: 1px solid var(--grid); padding: 4px 8px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { background: var(--blue-l); }
+.scroll { max-height: 220px; overflow: auto; }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: var(--amber-l); color: var(--ink); border: 1px solid var(--yellow); vertical-align: middle; margin-left: 6px; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 20px; }
+@media (max-width: 520px) { .tile .v { font-size: 20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>PlateWise<span>.</span> Dashboard</h1>
+      <p class="sub">AI-driven food-waste analytics for canteens and messes &middot; The Entrepreneurial Manager &middot; Tanish Tyagi, M56D-26</p>
+    </div>
+    <button id="themeBtn" type="button" aria-label="Toggle light and dark theme">Theme</button>
+  </header>
+  <div class="stripe"></div>
+  <div class="banner"><b>Read this first.</b> The pilot section uses <b>synthetic (simulated)</b> data, not a real mess. Market sizes come from published estimates; several inputs are low-confidence assumptions. Everything on this page is a model, not a forecast.</div>
+
+  <section class="card" id="scen">
+    <h2>Scenario explorer</h2>
+    <p class="note">Move the sliders or pick a scenario; the tiles and charts below recompute the 48-month model in your browser.</p>
+    <div class="btnrow" id="scenBtns"></div>
+    <div class="controls" id="controls"></div>
+  </section>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="grid g2">
+    <section class="card"><h2>Cash J-curve</h2><p class="note">Cumulative net cash by month (&#8377; lakh). The low point is the funding need.</p><div class="chart" id="cJ"></div></section>
+    <section class="card"><h2>Customer sites</h2><p class="note">Active customer sites by month.</p><div class="chart" id="cC"></div></section>
+  </div>
+
+  <div class="grid g2">
+    <section class="card"><h2>Market funnel</h2><p class="note">Contract catering to PlateWise revenue pool (&#8377; crore per year). Later steps are small next to the full market, which is the point.</p><div class="chart" id="cF"></div></section>
+    <section class="card"><h2>Market sizing</h2><p class="note">TAM, SAM and SOM (&#8377; crore per year).</p><div class="chart" id="cM"></div></section>
+  </div>
+
+  <div class="grid g2">
+    <section class="card"><h2>Unit economics, one 1,000-diner site <span id="ueTag"></span></h2><p class="note">&#8377; lakh per site per year, from the current slider settings.</p><div class="chart" id="cU"></div></section>
+    <section class="card"><h2>What moves LTV:CAC</h2><p class="note">One-at-a-time change from the base case of 3.06. Orange = adverse value, blue = favourable value.</p><div class="chart" id="cT"></div></section>
+  </div>
+
+  <section class="card">
+    <h2>Pilot explorer <span class="tag">SIMULATED</span></h2>
+    <p class="note">28 evaluation days of a synthetic 800-resident mess. Pick the cooking buffer to see the waste versus shortage trade-off for the ridge forecast.</p>
+    <div class="grid g2">
+      <div><div class="legend" id="lgP"></div><div class="chart" id="cP"></div></div>
+      <div>
+        <div class="chart" id="cE"></div>
+        <div class="controls" style="grid-template-columns:1fr"><div class="ctl"><label>Safety buffer on forecast <b id="bufV"></b></label><input type="range" id="buf" min="0" max="20" step="1" value="7"></div></div>
+        <div class="tiles" id="pTiles" style="margin-top:12px;grid-template-columns:repeat(2,1fr)"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Scenario comparison</h2><p class="note">Pre-computed in the report (pessimistic, base, optimistic).</p>
+    <div class="scroll"><table id="scTable"></table></div>
+  </section>
+
+  <footer>Source: PlateWise WAI report (Section references in the Word report). Data: <code>data/data.js</code>, generated from <code>data/results.json</code>. AI-assisted (Claude, Anthropic); AI use is disclosed in the report, Section 11.</footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="data/data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var PW = window.PW, A0 = PW.A;
+  var C = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  var INR = "₹";
+  var NS = "http://www.w3.org/2000/svg";
+  var tipEl = document.getElementById("tip");
+
+  /* ---------- model (port of model.py) ---------- */
+  function unit(a) {
+    var gross = a.diners * a.days * a.food_per_day * a.waste_pct * a.reduction;
+    var sub = a.diners * a.sub_per_diner_month * a.sub_months;
+    var rev = sub + a.gain_share * gross;
+    var cogs = a.cogs_cloud + a.cogs_support + a.cogs_hw_dep;
+    var gp = rev - cogs;
+    return { gross: gross, sub: sub, gain: a.gain_share * gross, rev: rev, cogs: cogs, gp: gp,
+      gm: rev ? gp / rev : 0, payback: gp > 0 ? a.cac / (gp / 12) : Infinity,
+      ltv: gp > 0 ? gp / (a.churn + a.disc) : 0, ltv_cac: (gp > 0 ? gp / (a.churn + a.disc) : 0) / a.cac,
+      net_client: gross - rev, portions: gross / a.cost_per_portion };
+  }
+  function interp(x, xs, ys) {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+    for (var i = 1; i < xs.length; i++) if (x <= xs[i]) return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
+  }
+  function monthlyAdds(a, months) {
+    var out = [], i, y;
+    var rates = a.adds.map(function (v) { return v / 12; });
+    var raw = [];
+    for (i = 0; i < months; i++) raw.push(interp(i + 0.5, [6, 18, 30, 42], rates));
+    for (y = 0; y < months / 12; y++) {
+      var s = 0;
+      for (i = 12 * y; i < 12 * y + 12; i++) s += raw[i];
+      for (i = 12 * y; i < 12 * y + 12; i++)
+        out[i] = (y === 0 ? a.adds[0] * (i - 12 * y + 1) / 78 : raw[i] * a.adds[y] / s) * a.add_mult;
+    }
+    return out;
+  }
+  function simulate(a) {
+    var u = unit(a), adds = monthlyAdds(a, 48), cust = 0, cum = 0, rows = [], m;
+    for (m = 0; m < 48; m++) {
+      var y = Math.floor(m / 12), start = cust;
+      cust = cust - cust * a.churn / 12 + adds[m];
+      var avg = (start + cust) / 2;
+      var rev = avg * u.rev / 12, cogsCash = avg * (a.cogs_cloud + a.cogs_support) / 12;
+      var net = rev - cogsCash - adds[m] * a.hw_capex - adds[m] * a.cac - a.fixed_opex[y] * a.fixed_mult / 12;
+      cum += net;
+      rows.push({ m: m + 1, cust: cust, rev: rev, net: net, cum: cum });
+    }
+    var minCum = Math.min.apply(null, rows.map(function (r) { return r.cum; }));
+    var trough = rows.filter(function (r) { return r.cum === minCum; })[0];
+    var pos = rows.filter(function (r) { return r.net > 0 && r.m > 12; })[0];
+    return { u: u, rows: rows, need: Math.max(0, -minCum), troughM: trough.m, posM: pos ? pos.m : null,
+      cust36: rows[35].cust, arr36: rows[35].cust * u.rev };
+  }
+
+  /* ---------- state & controls ---------- */
+  var A = JSON.parse(JSON.stringify(A0));
+  var SCEN = {
+    "Pessimistic": { reduction: 0.20, waste_pct: 0.08, add_mult: 0.7, cac: 260000, churn: 0.28 },
+    "Base": {},
+    "Optimistic": { reduction: 0.40, waste_pct: 0.12, add_mult: 1.2, cac: 160000, churn: 0.12 }
+  };
+  var SL = [
+    { k: "reduction", label: "Waste reduction achieved", min: 0.10, max: 0.55, step: 0.01, f: function (v) { return (v * 100).toFixed(0) + "%"; } },
+    { k: "waste_pct", label: "Share of food wasted today", min: 0.03, max: 0.18, step: 0.01, f: function (v) { return (v * 100).toFixed(0) + "%"; } },
+    { k: "sub_per_diner_month", label: "Subscription (" + INR + "/diner/month)", min: 5, max: 25, step: 1, f: function (v) { return INR + v; } },
+    { k: "gain_share", label: "Gain-share rate", min: 0, max: 0.4, step: 0.01, f: function (v) { return (v * 100).toFixed(0) + "%"; } },
+    { k: "cac", label: "Acquisition cost per site", min: 100000, max: 400000, step: 10000, f: function (v) { return INR + (v / 1e5).toFixed(1) + " lakh"; } },
+    { k: "churn", label: "Annual churn", min: 0.05, max: 0.4, step: 0.01, f: function (v) { return (v * 100).toFixed(0) + "%"; } },
+    { k: "add_mult", label: "Customer wins vs plan", min: 0.4, max: 1.6, step: 0.05, f: function (v) { return (v * 100).toFixed(0) + "%"; } },
+    { k: "diners", label: "Diners per site", min: 500, max: 2000, step: 50, f: function (v) { return v.toLocaleString("en-IN"); } }
+  ];
+  var scenBtns = document.getElementById("scenBtns"), ctl = document.getElementById("controls");
+  var inputs = {};
+  SL.forEach(function (s) {
+    var d = document.createElement("div"); d.className = "ctl";
+    d.innerHTML = '<label>' + s.label + ' <b></b></label><input type="range" min="' + s.min + '" max="' + s.max + '" step="' + s.step + '">';
+    ctl.appendChild(d);
+    var inp = d.querySelector("input"), out = d.querySelector("b");
+    inputs[s.k] = { inp: inp, out: out, s: s };
+    inp.addEventListener("input", function () { A[s.k] = parseFloat(inp.value); markScenario(null); render(); });
+  });
+  Object.keys(SCEN).concat(["Reset"]).forEach(function (n) {
+    var b = document.createElement("button"); b.type = "button"; b.textContent = n; b.dataset.n = n;
+    b.addEventListener("click", function () { applyScenario(n === "Reset" ? "Base" : n); });
+    scenBtns.appendChild(b);
+  });
+  function applyScenario(n) {
+    A = JSON.parse(JSON.stringify(A0));
+    var o = SCEN[n]; Object.keys(o).forEach(function (k) { A[k] = o[k]; });
+    markScenario(n); render();
+  }
+  function markScenario(n) {
+    Array.prototype.forEach.call(scenBtns.children, function (b) { b.classList.toggle("on", b.dataset.n === n); });
+  }
+  function syncControls() {
+    SL.forEach(function (s) { var i = inputs[s.k]; i.inp.value = A[s.k]; i.out.textContent = s.f(A[s.k]); });
+  }
+
+  /* ---------- svg helpers ---------- */
+  function el(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function nice(max, n) {
+    var raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+    var s = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+    return s * p;
+  }
+  function ticks(min, max, n) {
+    var step = nice(max - min, n), t = [], v = Math.floor(min / step) * step;
+    for (; v <= max + 1e-9; v += step) t.push(Math.round(v / step * 1e6) / 1e6 * step);
+    return t;
+  }
+  function showTip(html, ev, host) {
+    var r = host.getBoundingClientRect();
+    tipEl.innerHTML = html; tipEl.style.display = "block";
+    var x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 10;
+    if (tipEl.parentNode !== host) host.appendChild(tipEl);
+    var tw = tipEl.offsetWidth;
+    if (x + tw > r.width) x = ev.clientX - r.left - tw - 14;
+    tipEl.style.left = Math.max(0, x) + "px"; tipEl.style.top = y + "px";
+  }
+  function hideTip() { tipEl.style.display = "none"; }
+
+  /* generic line chart: series [{name,color,dash,pts:[[x,y]...]}] */
+  function lineChart(host, o) {
+    host.innerHTML = "";
+    var W = 560, H = o.h || 260, m = { l: 52, r: o.rpad || 56, t: 12, b: 34 };
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": o.aria }, host);
+    var xs = [], ys = [];
+    o.series.forEach(function (s) { s.pts.forEach(function (p) { xs.push(p[0]); ys.push(p[1]); }); });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var y0 = o.ymin != null ? o.ymin : Math.min(0, Math.min.apply(null, ys)), y1 = o.ymax != null ? o.ymax : Math.max.apply(null, ys);
+    var yt = ticks(y0, y1, 5); y0 = Math.min(y0, yt[0]); y1 = Math.max(y1, yt[yt.length - 1]);
+    var X = function (v) { return m.l + (v - x0) / (x1 - x0 || 1) * (W - m.l - m.r); };
+    var Y = function (v) { return H - m.b - (v - y0) / (y1 - y0 || 1) * (H - m.t - m.b); };
+    yt.forEach(function (t) {
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), stroke: C("--grid"), "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 6, y: Y(t) + 4, "text-anchor": "end", class: "tick" }, svg, o.yfmt(t));
+    });
+    if (y0 < 0 && y1 > 0) el("line", { x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0), stroke: C("--axis"), "stroke-width": 1.5 }, svg);
+    (o.xticks || ticks(x0, x1, 6)).forEach(function (t) {
+      el("text", { x: X(t), y: H - m.b + 16, "text-anchor": "middle", class: "tick" }, svg, String(t));
+    });
+    el("text", { x: (m.l + W - m.r) / 2, y: H - 4, "text-anchor": "middle" }, svg, o.xlabel || "");
+    o.series.forEach(function (s) {
+      var d = s.pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1); }).join("");
+      el("path", { d: d, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-dasharray": s.dash || "none", "stroke-linejoin": "round" }, svg);
+      var last = s.pts[s.pts.length - 1];
+      if (o.endLabels) el("text", { x: X(last[0]) + 6, y: Y(last[1]) + 4, class: "lab", style: "fill:" + s.color }, svg, s.name);
+    });
+    (o.marks || []).forEach(function (mk) {
+      el("circle", { cx: X(mk.x), cy: Y(mk.y), r: 5, fill: mk.color, stroke: C("--surface"), "stroke-width": 2 }, svg);
+      el("text", { x: X(mk.x), y: Y(mk.y) + 20, class: "lab", "text-anchor": "end" }, svg, mk.label);
+    });
+    // hover crosshair
+    var cross = el("line", { y1: m.t, y2: H - m.b, stroke: C("--muted"), "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+    var dots = o.series.map(function (s) { return el("circle", { r: 4, fill: s.color, stroke: C("--surface"), "stroke-width": 2, visibility: "hidden" }, svg); });
+    var rect = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    rect.addEventListener("mousemove", function (ev) {
+      var b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) / b.width * W;
+      var xv = x0 + (px - m.l) / (W - m.l - m.r) * (x1 - x0);
+      var ref = o.series[0].pts, bi = 0, bd = 1e18;
+      ref.forEach(function (p, i) { var d = Math.abs(p[0] - xv); if (d < bd) { bd = d; bi = i; } });
+      cross.setAttribute("x1", X(ref[bi][0])); cross.setAttribute("x2", X(ref[bi][0])); cross.setAttribute("visibility", "visible");
+      var html = "<b>" + (o.xname || "x") + " " + ref[bi][0] + "</b>";
+      o.series.forEach(function (s, k) {
+        var p = s.pts[bi]; if (!p) return;
+        dots[k].setAttribute("cx", X(p[0])); dots[k].setAttribute("cy", Y(p[1])); dots[k].setAttribute("visibility", "visible");
+        html += '<div><span style="color:' + s.color + '">&#9632;</span> ' + s.name + ": " + (o.tfmt || o.yfmt)(p[1]) + "</div>";
+      });
+      showTip(html, ev, host);
+    });
+    rect.addEventListener("mouseleave", function () { hideTip(); cross.setAttribute("visibility", "hidden"); dots.forEach(function (d) { d.setAttribute("visibility", "hidden"); }); });
+    // legend + table
+    var lg = document.createElement("div"); lg.className = "legend";
+    o.series.forEach(function (s) { lg.innerHTML += '<span><i style="background:' + s.color + '"></i>' + s.name + "</span>"; });
+    if (o.series.length > 1 || o.legend) host.insertBefore(lg, svg);
+    var det = document.createElement("details"), rowsN = o.series[0].pts.length;
+    var tb = "<summary>Table view</summary><div class='scroll'><table><tr><th>" + (o.xname || "x") + "</th>" + o.series.map(function (s) { return "<th>" + s.name + "</th>"; }).join("") + "</tr>";
+    for (var i = 0; i < rowsN; i++) tb += "<tr><td>" + o.series[0].pts[i][0] + "</td>" + o.series.map(function (s) { return "<td>" + (o.tfmt || o.yfmt)(s.pts[i][1]) + "</td>"; }).join("") + "</tr>";
+    det.innerHTML = tb + "</table></div>"; host.appendChild(det);
+  }
+
+  /* horizontal bars: rows [{label,value,color,tip}] */
+  function hBars(host, rows, o) {
+    host.innerHTML = "";
+    var W = 560, rh = 30, H = rows.length * rh + 20, ml = o.ml || 170, mr = 80;
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": o.aria }, host);
+    var mx = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.value); })) * 1.0 || 1;
+    var X = function (v) { return ml + v / mx * (W - ml - mr); };
+    rows.forEach(function (r, i) {
+      var y = 10 + i * rh;
+      el("text", { x: ml - 8, y: y + 17, "text-anchor": "end" }, svg, r.label);
+      var bw = Math.max(1, X(r.value) - ml);
+      var rect = el("rect", { x: ml, y: y + 4, width: bw, height: 18, rx: 4, fill: r.color }, svg);
+      el("text", { x: ml + bw + 6, y: y + 17, class: "lab" }, svg, o.vfmt(r.value));
+      rect.addEventListener("mousemove", function (ev) { showTip("<b>" + r.label + "</b>" + (r.tip || o.vfmt(r.value)), ev, host); });
+      rect.addEventListener("mouseleave", hideTip);
+    });
+    if (o.table !== false) {
+      var det = document.createElement("details");
+      det.innerHTML = "<summary>Table view</summary><table>" + rows.map(function (r) { return "<tr><td>" + r.label + "</td><td>" + o.vfmt(r.value) + "</td></tr>"; }).join("") + "</table>";
+      host.appendChild(det);
+    }
+  }
+
+  /* diverging tornado */
+  function tornado(host) {
+    host.innerHTML = "";
+    var rows = PW.sens.slice().sort(function (a, b) { return b.swing - a.swing; });
+    var W = 560, rh = 34, H = rows.length * rh + 52, ml = 225, mr = 20;
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Tornado of LTV to CAC sensitivity" }, host);
+    var mx = 2, zero = ml + (W - ml - mr) * 0.4, sc = (W - ml - mr) * 0.6 / mx, scn = (zero - ml) / mx;
+    [-1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2].forEach(function (t) {
+      var x = zero + (t < 0 ? t * scn : t * sc);
+      el("line", { x1: x, x2: x, y1: 8, y2: H - 40, stroke: t === 0 ? C("--axis") : C("--grid"), "stroke-width": t === 0 ? 1.5 : 1 }, svg);
+      el("text", { x: x, y: H - 24, "text-anchor": "middle", class: "tick" }, svg, (t > 0 ? "+" : "") + t.toFixed(1));
+    });
+    rows.forEach(function (r, i) {
+      var y = 10 + i * rh;
+      el("text", { x: ml - 8, y: y + 14, "text-anchor": "end" }, svg, r.label);
+      el("text", { x: ml - 8, y: y + 26, "text-anchor": "end", class: "tick" }, svg, r.txt);
+      var a = el("rect", { x: zero + r.low * scn, y: y + 4, width: -r.low * scn, height: 20, rx: 3, fill: C("--orange") }, svg);
+      var b = el("rect", { x: zero, y: y + 4, width: r.high * sc, height: 20, rx: 3, fill: C("--blue") }, svg);
+      [[a, r.low, "adverse"], [b, r.high, "favourable"]].forEach(function (p) {
+        p[0].addEventListener("mousemove", function (ev) { showTip("<b>" + r.label + "</b>" + r.txt + "<br>" + p[2] + ": " + (p[1] > 0 ? "+" : "") + p[1].toFixed(2) + " LTV:CAC", ev, host); });
+        p[0].addEventListener("mouseleave", hideTip);
+      });
+    });
+    el("text", { x: (ml + W - mr) / 2, y: H - 2, "text-anchor": "middle" }, svg, "Change in LTV:CAC");
+    host.insertAdjacentHTML("afterbegin", '<div class="legend"><span><i class="sq" style="background:var(--orange)"></i>Adverse value</span><span><i class="sq" style="background:var(--blue)"></i>Favourable value</span></div>');
+  }
+
+  /* ---------- formatters ---------- */
+  var lakh = function (v) { return (v / 1e5).toFixed(0); };
+  var lakh1 = function (v) { return (v / 1e5).toFixed(1); };
+  var crore = function (v, d) { return (v / 1e7).toFixed(d == null ? 2 : d); };
+
+  /* ---------- render ---------- */
+  function tiles(host, items) {
+    host.innerHTML = items.map(function (t) { return '<div class="tile ' + t[2] + '"><div class="v">' + t[0] + '</div><div class="k">' + t[1] + "</div></div>"; }).join("");
+  }
+  function render() {
+    syncControls();
+    var S = simulate(A), u = S.u;
+    tiles(document.getElementById("tiles"), [
+      [u.ltv_cac.toFixed(2) + "x", "LTV : CAC", u.ltv_cac >= 3 ? "teal" : u.ltv_cac >= 2 ? "blue" : "orange"],
+      [isFinite(u.payback) ? u.payback.toFixed(1) + " mo" : "never", "CAC payback", "violet"],
+      [(u.gm * 100).toFixed(0) + "%", "Gross margin", "teal"],
+      [INR + crore(S.need) + " cr", "Funding need (trough, month " + S.troughM + ")", "orange"],
+      [S.posM ? "Month " + S.posM : "Not by 48", "First cash-positive month", S.posM ? "teal" : "orange"],
+      [S.cust36.toFixed(0), "Customer sites, month 36", "blue"],
+      [INR + crore(S.arr36) + " cr", "ARR at month 36", "violet"]
+    ]);
+    var xs = S.rows.map(function (r) { return r.m; });
+    var troughRow = S.rows[S.troughM - 1];
+    lineChart(document.getElementById("cJ"), {
+      aria: "Cumulative cash by month", xname: "Month", xlabel: "Month", xticks: [1, 12, 24, 36, 48], legend: false,
+      series: [{ name: "Cumulative cash", color: C("--blue"), pts: S.rows.map(function (r) { return [r.m, r.cum / 1e5]; }) }],
+      yfmt: function (v) { return Math.round(v); }, tfmt: function (v) { return INR + v.toFixed(1) + " lakh"; }, rpad: 20,
+      marks: [{ x: S.troughM, y: troughRow.cum / 1e5, color: C("--orange"), label: "Low point: -" + INR + Math.abs(troughRow.cum / 1e5).toFixed(0) + " lakh (month " + S.troughM + ")" }]
+    });
+    lineChart(document.getElementById("cC"), {
+      aria: "Customer sites by month", xname: "Month", xlabel: "Month", xticks: [1, 12, 24, 36, 48], legend: false,
+      series: [{ name: "Customer sites", color: C("--aqua"), pts: S.rows.map(function (r) { return [r.m, r.cust]; }) }],
+      yfmt: function (v) { return Math.round(v); }, tfmt: function (v) { return v.toFixed(1); }, rpad: 20
+    });
+    var M = PW.market;
+    hBars(document.getElementById("cF"), [
+      { label: "Contract catering", value: M.cc_cr, color: C("--blue") },
+      { label: "Food purchases (35%)", value: M.food_cr, color: C("--blue") },
+      { label: "Wasted food (10%)", value: M.waste_cr, color: C("--orange") },
+      { label: "Reducible (30%)", value: M.reduc_cr, color: C("--aqua") },
+      { label: "PlateWise pool (TAM)", value: M.tam_cr, color: C("--violet") }
+    ], { vfmt: function (v) { return INR + Math.round(v).toLocaleString("en-IN") + " cr"; }, aria: "Market funnel", ml: 150 });
+    hBars(document.getElementById("cM"), [
+      { label: "TAM, top-down", value: M.tam_cr, color: C("--blue") },
+      { label: "TAM, bottom-up", value: M.bottomup_cr, color: C("--blue") },
+      { label: "SAM (30% reach)", value: M.sam_cr, color: C("--aqua") },
+      { label: "SOM (ARR, month 36)", value: M.som_cr, color: C("--violet") }
+    ], { vfmt: function (v) { return INR + v.toFixed(1) + " cr"; }, aria: "TAM SAM SOM", ml: 150 });
+    var isBase = JSON.stringify(A) === JSON.stringify(A0);
+    document.getElementById("ueTag").innerHTML = isBase ? "" : '<span class="tag">custom</span>';
+    hBars(document.getElementById("cU"), [
+      { label: "Client: gross saving", value: u.gross / 1e5, color: C("--blue") },
+      { label: "Client: PlateWise fees", value: u.rev / 1e5, color: C("--orange") },
+      { label: "Client: net saving", value: u.net_client / 1e5, color: C("--aqua") },
+      { label: "PlateWise: revenue", value: u.rev / 1e5, color: C("--blue") },
+      { label: "PlateWise: cost of service", value: u.cogs / 1e5, color: C("--orange") },
+      { label: "PlateWise: gross profit", value: u.gp / 1e5, color: C("--aqua") }
+    ], { vfmt: function (v) { return INR + v.toFixed(2) + " L"; }, aria: "Unit economics", ml: 170 });
+    renderPilot();
+  }
+
+  /* ---------- pilot ---------- */
+  var PR = PW.pilotRows;
+  function policy(b) {
+    var cooked = 0, waste = 0, unserved = 0, dem = 0, so = 0;
+    PR.forEach(function (r) {
+      var cook = Math.round(r[6] * (1 + b)), d = r[2];
+      cooked += cook; dem += d; waste += Math.max(cook - d, 0); unserved += Math.max(d - cook, 0); if (cook < d) so++;
+    });
+    return { waste: waste / cooked, unserved: unserved / dem, stockout: so / PR.length };
+  }
+  function baseline() {
+    var cooked = 0, waste = 0;
+    PR.forEach(function (r) { cooked += r[3]; waste += Math.max(r[3] - r[2], 0); });
+    return waste / cooked;
+  }
+  var buf = document.getElementById("buf");
+  buf.addEventListener("input", renderPilot);
+  function renderPilot() {
+    var b = parseInt(buf.value, 10) / 100;
+    document.getElementById("bufV").textContent = "+" + buf.value + "%";
+    var idx = function (r) { return r[0] * 2 + r[1] - PR[0][0] * 2; };
+    var pts = function (col) { return PR.map(function (r, i) { return [i + 1, r[col]]; }); };
+    var cookPts = PR.map(function (r, i) { return [i + 1, Math.round(r[6] * (1 + b))]; });
+    document.getElementById("lgP").innerHTML = "";
+    lineChart(document.getElementById("cP"), {
+      aria: "Simulated demand, fixed cooking norm and forecast", xname: "Meal #", xlabel: "Meal in the evaluation window (2 per day)", ymin: 400, h: 280, rpad: 20,
+      series: [
+        { name: "Actual demand", color: C("--blue"), pts: pts(2) },
+        { name: "Current practice (fixed norm)", color: C("--orange"), pts: pts(3), dash: "5 3" },
+        { name: "Cook plan (forecast + buffer)", color: C("--aqua"), pts: cookPts }
+      ],
+      yfmt: function (v) { return Math.round(v); }, tfmt: function (v) { return Math.round(v) + " portions"; }
+    });
+    var buffers = [], wasteS = [], unS = [];
+    for (var k = 0; k <= 20; k++) { var p = policy(k / 100); buffers.push(k); wasteS.push([k, p.waste * 100]); unS.push([k, p.unserved * 100]); }
+    lineChart(document.getElementById("cE"), {
+      aria: "Waste and unserved demand versus buffer", xname: "Buffer %", xlabel: "Safety buffer on forecast (%)", h: 220, rpad: 20,
+      series: [{ name: "Food wasted (% of cooked)", color: C("--orange"), pts: wasteS }, { name: "Unserved demand (% of demand)", color: C("--blue"), pts: unS }],
+      yfmt: function (v) { return v.toFixed(0) + "%"; }, tfmt: function (v) { return v.toFixed(2) + "%"; }
+    });
+    var cur = policy(b), base = baseline();
+    tiles(document.getElementById("pTiles"), [
+      [(cur.waste * 100).toFixed(1) + "%", "Waste at this buffer (baseline " + (base * 100).toFixed(1) + "%)", "orange"],
+      [(cur.unserved * 100).toFixed(2) + "%", "Unserved demand", "blue"],
+      [(cur.stockout * 100).toFixed(1) + "%", "Meals with a stock-out", "violet"],
+      [(((base - cur.waste) / base) * 100).toFixed(0) + "%", "Waste reduction vs fixed norm", "teal"]
+    ]);
+  }
+
+  /* ---------- tornado & scenario table ---------- */
+  tornado(document.getElementById("cT"));
+  (function () {
+    var sc = PW.scenarios, t = document.getElementById("scTable");
+    var rows = [
+      ["LTV : CAC", function (s) { return s.ltv_cac.toFixed(2); }],
+      ["CAC payback (months)", function (s) { return s.payback.toFixed(1); }],
+      ["Gross margin", function (s) { return (s.gm * 100).toFixed(0) + "%"; }],
+      ["Customer sites, month 36", function (s) { return s.cust36.toFixed(0); }],
+      ["ARR, month 36 (" + INR + " cr)", function (s) { return (s.arr36 / 1e7).toFixed(2); }],
+      ["Cash needed at low point (" + INR + " cr)", function (s) { return (s.need / 1e7).toFixed(2); }],
+      ["First cash-positive month", function (s) { return s.pos_month ? s.pos_month : "none by 48"; }]
+    ];
+    t.innerHTML = "<tr><th>Metric</th>" + sc.map(function (s) { return "<th>" + s.name + "</th>"; }).join("") + "</tr>" +
+      rows.map(function (r) { return "<tr><td>" + r[0] + "</td>" + sc.map(function (s) { return "<td>" + r[1](s) + "</td>"; }).join("") + "</tr>"; }).join("");
+  })();
+
+  /* ---------- theme ---------- */
+  var themeBtn = document.getElementById("themeBtn");
+  themeBtn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var dark = cur ? cur === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    tornado(document.getElementById("cT")); render();
+  });
+  if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { tornado(document.getElementById("cT")); render(); });
+
+  markScenario("Base");
+  render();
+})();
+</script>
+</body>
+</html>

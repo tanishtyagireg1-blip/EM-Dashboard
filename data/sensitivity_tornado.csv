@@ -1,0 +1,9 @@
+driver,tested_range,delta_ltv_cac_adverse,delta_ltv_cac_favourable
+Diners per canteen,"700 / 1,400",-1.316,1.755
+Share of food purchases wasted today,5% / 15%,-1.139,1.139
+Waste reduction achieved,15% / 45%,-1.139,1.139
+Annual churn,30% / 10%,-0.728,1.391
+Customer acquisition cost,Rs 3.0 / 1.5 lakh,-1.02,1.02
+Subscription (Rs/diner/month),Rs 10 / 20,-0.703,0.703
+Raw-food spend per diner per day,Rs 70 / 120,-0.506,0.759
+Gain-share rate,15% / 25%,-0.57,0.57
